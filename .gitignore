@@ -1,0 +1,14 @@
+# build output (regenerate with `make`)
+/build/
+*.dtb
+*.dtbo
+*.dtbo.img
+# keep the reference stock blobs under original/
+!original/*.dtb
+!original/*.img
+# editor / os cruft
+*.swp
+*.swo
+*~
+.DS_Store
+__pycache__/

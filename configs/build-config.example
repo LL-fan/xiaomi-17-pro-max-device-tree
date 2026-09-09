@@ -1,0 +1,42 @@
+# =============================================================================
+# build-config.example  —  Xiaomi 17 Pro Max (popsicle / canoe / SM8850)
+#
+# This mirrors the vendor kernel build configuration used by the device
+# (MiCode popsicle-w-oss: build.config.msm.popsicle -> build.config.msm.canoe
+#  -> build.config.msm.common / build.config.aarch64).
+#
+# It is only needed if you want to rebuild the dtb/dtbo *inside the full
+# Qualcomm/Xiaomi GKI kernel tree (kleaf / build.sh). To rebuild the DTS in
+# THIS standalone repository you only need `dtc` — just run `make`.
+# =============================================================================
+
+# ---- target / arch -----------------------------------------------------------
+MSM_ARCH=canoe                     # Qualcomm SM8850 SDM board codename
+DEFCONFIG=canoe-gki_defconfig      # vendor defconfig (name in full kernel tree)
+ARCH=arm64
+VARIANTS=(consolidate perf)
+VARIANT=consolidate
+
+# ---- boot image / device-tree layout ----------------------------------------
+ABL_SRC=bootable/bootloader/edk2
+BOOT_IMAGE_HEADER_VERSION=4
+BASE_ADDRESS=0x80000000
+PAGE_SIZE=4096
+DT_OVERLAY_SUPPORT=1               # build dtbo (board overlay) in addition to dtb
+
+# ---- loadable kernel modules -------------------------------------------------
+BUILD_VENDOR_DLKM=1
+PREPARE_SYSTEM_DLKM=1
+BUILD_INIT_BOOT_IMG=1
+TRIM_UNUSED_MODULES=1
+
+# ---- kernel command line (also see original/stock-bootconfig.txt) -----------
+KERNEL_VENDOR_CMDLINE+='console=ttyMSM0,115200n8 earlycon bootconfig'
+
+# ---- toolchain ---------------------------------------------------------------
+# AOSP prebuilt LLVM/Clang (hermetic in the Android build), e.g.
+#   PATH=prebuilts/clang/host/linux-x86/clang-r<rev>/bin:$PATH
+#   make LLVM=1 LLVM_IAS=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+#
+# Linux kernel: android16-6.12 (6.12.92), GKI
+# Vendor glue : MiCode/Xiaomi_Kernel_OpenSource  branch popsicle-w-oss

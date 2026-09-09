@@ -1,0 +1,452 @@
+/dts-v1/;
+
+/ {
+	#address-cells = <0x02>;
+	#size-cells = <0x02>;
+	qcom,msm-id = <0x10295 0x10000 0x30295 0x10000 0x1030294 0x10000 0x10294 0x10000 0x10295 0x20000 0x30295 0x20000 0x1010294 0x10000 0x1010295 0x10000 0x1030294 0x20000 0x1030295 0x20000 0x30294 0x20000 0x1010294 0x20000 0x1010295 0x20000 0x10294 0x20000 0x1030295 0x10000 0x30294 0x10000>;
+	model = "Qualcomm Technologies, Inc. Canoe OEMVM MTP";
+	compatible = "qcom,canoe-mtp\0qcom,canoe\0qcom,canoep-mtp\0qcom,canoep\0qcom,mtp";
+	qcom,board-id = <0x08 0x00>;
+
+	host {
+		#address-cells = <0x02>;
+		#size-cells = <0x02>;
+
+		qcom,gh-qtimer@1781b000 {
+			reg = <0x00 0x1781b000 0x00 0x1000>;
+			android,pvmfw,target = <0x01>;
+		};
+
+		qcom,wdt@17600000 {
+			reg = <0x00 0x17600000 0x00 0x1000>;
+			android,pvmfw,target = <0x02>;
+		};
+
+		buffer@800006000 {
+			reg = <0x08 0x6000 0x00 0x9000>;
+			android,pvmfw,target = <0x03>;
+		};
+
+		buffer@800200000 {
+			reg = <0x08 0x200000 0x00 0x400000>;
+			android,pvmfw,target = <0x04>;
+		};
+
+		non-devices-common {
+			reg = <0x00 0x00 0x00 0x00>;
+			android,pvmfw,target = <0x05>;
+		};
+
+		avf-mitee-bootshim {
+			reg = <0x00 0x00 0x00 0x00>;
+			android,pvmfw,target = <0x06>;
+		};
+
+		avf-mitee-user {
+			reg = <0x00 0x00 0x00 0x00>;
+			android,pvmfw,target = <0x07>;
+		};
+	};
+
+	qcom,vm-config {
+		compatible = "qcom,vm-1.0";
+		vm-type = "aarch64-guest";
+		boot-config = "fdt,unified";
+		os-type = "linux";
+		kernel-entry-segment = "kernel";
+		kernel-entry-offset = <0x00 0x00>;
+		vendor = "QTI";
+		image-name = "qcom,oemvm";
+		qcom,pasid = <0x00 0x22>;
+		qcom,qtee-config-info = "p=3,9,7C,8F,97,159,7F1,6f656d76,45726f6c,43657274,53656343,32725d4c;";
+		qcom,secdomain-ids = <0x31>;
+		qcom,primary-vm-index = <0x00>;
+		vm-uri = "vmuid/oemvm";
+		vm-guid = "847bfe26-0b12-5728-812a-06103f6bdec0";
+		qcom,sensitive;
+		vm-attrs = "context-dump";
+		vmmio-ranges = <0x00 0x2e8 0x00 0x08 0x00 0x2f8 0x00 0x08 0x00 0x3e8 0x00 0x08 0x00 0x3f8 0x00 0x08 0x00 0x2000 0x00 0x1000 0x00 0x3000 0x00 0x1000 0x00 0x2c000000 0x00 0x2000000 0x00 0x2e000000 0x00 0x1000000>;
+
+		vcpus {
+			affinity = "proxy";
+		};
+
+		vdevices {
+			generate = "/hypervisor";
+
+			minidump {
+				vdevice-type = "minidump";
+				push-compatible = "qcom,minidump_rm";
+				minidump_allowed;
+			};
+
+			rm-rpc {
+				vdevice-type = "rm-rpc";
+				generate = "/hypervisor/qcom,resource-mgr";
+				console-dev;
+				message-size = <0xf0>;
+				queue-depth = <0x08>;
+				qcom,label = <0x01>;
+			};
+
+			hlos-message-queue-pair {
+				vdevice-type = "message-queue-pair";
+				generate = "/hypervisor/hlos-msgq-pair";
+				message-size = <0xf0>;
+				queue-depth = <0x08>;
+				peer-default;
+				qcom,label = <0x105>;
+			};
+
+			msgqsock-msgq-pair {
+				vdevice-type = "message-queue-pair";
+				generate = "/hypervisor/msgqsock-msgq-pair";
+				message-size = <0xf0>;
+				queue-depth = <0x08>;
+				peer = "vm-name:qcom,trustedvm";
+				qcom,label = <0x103>;
+			};
+
+			test-dbl {
+				vdevice-type = "doorbell";
+				generate = "/hypervisor/test-dbl";
+				qcom,label = <0x105>;
+				peer-default;
+			};
+
+			test-dbl-source {
+				vdevice-type = "doorbell-source";
+				generate = "/hypervisor/test-dbl-source";
+				qcom,label = <0x105>;
+				peer-default;
+			};
+
+			qrtr-shm {
+				vdevice-type = "shm-doorbell";
+				generate = "/hypervisor/qrtr-shm";
+				push-compatible = "qcom,qrtr-gunyah-gen";
+				peer-default;
+
+				memory {
+					qcom,label = <0x108>;
+					#address-cells = <0x02>;
+					base = <0x00 0x64006000>;
+				};
+			};
+		};
+	};
+
+	fragment@0 {
+		target-path = "/";
+
+		__overlay__ {
+			#address-cells = <0x02>;
+			#size-cells = <0x02>;
+
+			firmware {
+				phandle = <0x18>;
+
+				qcom_scm {
+					compatible = "qcom,scm-v1.1\0qcom,scm";
+					interrupts = <0x00 0x3ad 0x01>;
+					qcom,max-queues = <0x23>;
+					phandle = <0x08>;
+				};
+			};
+
+			soc {
+				#address-cells = <0x02>;
+				#size-cells = <0x02>;
+				ranges = <0x00 0x00 0x00 0x00 0x00 0xffffffff>;
+				compatible = "simple-bus";
+				phandle = <0x19>;
+
+				non-devices-common {
+					reg = <0x00 0x00 0x00 0x00>;
+					required-subnodes = <0x08 0x09 0x0a 0x0b 0x0c 0x0d 0x0e>;
+					required-subnodes-rm = <0x0f 0x10 0x11>;
+					phandle = <0x05>;
+				};
+
+				qcom_smcinvoke {
+					compatible = "qcom,smcinvoke";
+					phandle = <0x09>;
+				};
+
+				qcom_mem_object {
+					compatible = "qcom,mem-object";
+					phandle = <0x0a>;
+				};
+
+				qtee_shmbridge {
+					compatible = "qcom,tee-shared-memory-bridge";
+					qcom,custom-bridge-size = <0x200>;
+					qcom,support-hypervisor;
+					phandle = <0x0b>;
+				};
+
+				qmsgq-gunyah {
+					compatible = "qcom,qmsgq-gh";
+					msgq-label = <0x103>;
+					peer = <0x02>;
+					phandle = <0x0c>;
+				};
+
+				qcom,gh-qtimer@1781b000 {
+					compatible = "qcom,gh-qtmr";
+					reg = <0x00 0x1781b000 0x00 0x1000>;
+					reg-names = "qtmr-base";
+					interrupts = <0x00 0x0d 0x04>;
+					interrupt-names = "qcom,qtmr-intr";
+					qcom,secondary;
+					phandle = <0x01>;
+				};
+
+				qcom,qrtr {
+					compatible = "qcom,qrtr";
+					qcom,node-id = <0x15>;
+					phandle = <0x0d>;
+				};
+
+				qrtr-gunyah {
+					compatible = "qcom,qrtr-gunyah";
+					gunyah-label = <0x6c>;
+					phandle = <0x0e>;
+				};
+
+				qcom,wdt@17600000 {
+					compatible = "qcom,msm-watchdog";
+					reg = <0x00 0x17600000 0x00 0x1000>;
+					reg-names = "wdt-base";
+					interrupts = <0x00 0x3a0 0x04 0x00 0x3a1 0x04>;
+					qcom,bark-time = <0x2af8>;
+					qcom,pet-time = <0x2490>;
+					qcom,ipi-ping;
+					qcom,wakeup-enable;
+					phandle = <0x02>;
+				};
+			};
+
+			mitee-bootshim {
+				reg = <0x00 0x00 0x00 0x00>;
+				required-subnodes = <0x12 0x13 0x14>;
+				cluster-count = <0x01>;
+				cpu-count = <0x02 0x00 0x00 0x00>;
+				psci-use-hvc;
+				phandle = <0x06>;
+
+				boot_cmdline {
+					bootargs = "kernel.serial=true memlog.encrypted=false kernel.console=true se.enable=false tui.enable=true qsee.enable=true mink.enable=true secmem.enable=false";
+					phandle = <0x12>;
+				};
+
+				mitee-timer {
+					compatible = "arm,armv8-mitee-timer";
+					irq-num = <0x1e 0x1b 0x00 0x00>;
+					phandle = <0x13>;
+				};
+
+				platform-id {
+					vid = <0x13>;
+					pid = <0x01>;
+					board-name = "sm8850";
+					phandle = <0x14>;
+				};
+			};
+
+			mitee-user {
+				reg = <0x00 0x00 0x00 0x00>;
+				required-subnodes = <0x15 0x16>;
+				phandle = <0x07>;
+
+				sfs {
+					compatible = "mitee,sfs";
+					storage-type = "ufs";
+					ree-fs-block-size-shift = <0x0e>;
+					ta-file-max-count = <0x200>;
+					required-subnodes = <0x17>;
+					phandle = <0x15>;
+
+					rpmb {
+						rpmb-multi-blk-support;
+						rpmb-fs-dev-id = <0x00>;
+						rpmb-size = <0x200000>;
+						region-index = <0x01>;
+						reserved-block = <0x00>;
+						phandle = <0x17>;
+					};
+				};
+
+				device-config {
+					se-spi-index = <0x03>;
+					phandle = <0x16>;
+				};
+			};
+
+			reserved-memory {
+				#address-cells = <0x02>;
+				#size-cells = <0x02>;
+				ranges;
+				phandle = <0x1a>;
+
+				buffer@800006000 {
+					compatible = "qcom,qrtr-gunyah-gen";
+					no-map;
+					peers = <0x03 0x31>;
+					qcom,label = <0x108>;
+					qcom,rm-mem-handle = <0x0b>;
+					qcom,shared-memory;
+					reg = <0x08 0x6000 0x00 0x9000>;
+					phandle = <0x03>;
+				};
+
+				buffer@800200000 {
+					compatible = "qcom,shm";
+					no-map;
+					peers = <0x03 0x31>;
+					qcom,label = <0x03>;
+					qcom,shared-memory;
+					reg = <0x08 0x200000 0x00 0x400000>;
+					phandle = <0x04>;
+				};
+			};
+		};
+	};
+
+	fragment@1 {
+		target-path = "/";
+
+		__overlay__ {
+
+			qrtr-shm {
+				buffer = <0x03>;
+				compatible = "qcom,qrtr-gunyah-gen\0qcom,gunyah-shm-doorbell";
+				label = <0x108>;
+				memory-region = <0x03>;
+				peer = <0x03>;
+				qcom,label = <0x108>;
+				rx-doorbell = <0x05>;
+				tx-doorbell = <0x04>;
+				phandle = <0x0f>;
+			};
+
+			minidump {
+				compatible = "qcom,minidump_rm\0qcom,minidump-rm";
+				phandle = <0x10>;
+			};
+
+			qcom,gunyah-vm {
+				compatible = "qcom,gunyah-vm-id-1.0\0qcom,gunyah-vm-id";
+				qcom,image-name = "qcom,oemvm";
+				qcom,owner-vmid = <0x03>;
+				qcom,peers = "vm-name:qcom,trustedvm";
+				qcom,vendor = "Qualcomm";
+				qcom,vm-guid = "847bfe26-0b12-5728-812a-06103f6bdec0";
+				qcom,vm-signing-authority = "qcom,oem";
+				qcom,vm-uri = "vmuid/oemvm";
+				qcom,vmid = <0x31>;
+				phandle = <0x11>;
+			};
+		};
+	};
+
+	__symbols__ {
+		firmware = "/fragment@0/__overlay__/firmware";
+		qcom_scm = "/fragment@0/__overlay__/firmware/qcom_scm";
+		soc = "/fragment@0/__overlay__/soc";
+		non_devices_common = "/fragment@0/__overlay__/soc/non-devices-common";
+		qcom_smcinvoke = "/fragment@0/__overlay__/soc/qcom_smcinvoke";
+		qcom_mem_object = "/fragment@0/__overlay__/soc/qcom_mem_object";
+		qtee_shmbridge = "/fragment@0/__overlay__/soc/qtee_shmbridge";
+		qmsgq_gunyah = "/fragment@0/__overlay__/soc/qmsgq-gunyah";
+		gh_qtimer = "/fragment@0/__overlay__/soc/qcom,gh-qtimer@1781b000";
+		qcom_qrtr = "/fragment@0/__overlay__/soc/qcom,qrtr";
+		qrtr_gunyah = "/fragment@0/__overlay__/soc/qrtr-gunyah";
+		wdog = "/fragment@0/__overlay__/soc/qcom,wdt@17600000";
+		mitee_bootshim = "/fragment@0/__overlay__/mitee-bootshim";
+		mitee_boot_cmdline = "/fragment@0/__overlay__/mitee-bootshim/boot_cmdline";
+		mitee_timer = "/fragment@0/__overlay__/mitee-bootshim/mitee-timer";
+		mitee_platform_id = "/fragment@0/__overlay__/mitee-bootshim/platform-id";
+		mitee_user = "/fragment@0/__overlay__/mitee-user";
+		mitee_sfs = "/fragment@0/__overlay__/mitee-user/sfs";
+		mitee_sfs_rpmb = "/fragment@0/__overlay__/mitee-user/sfs/rpmb";
+		mitee_device_config = "/fragment@0/__overlay__/mitee-user/device-config";
+		reserved_memory = "/fragment@0/__overlay__/reserved-memory";
+		qrtr_buff = "/fragment@0/__overlay__/reserved-memory/buffer@800006000";
+		shm = "/fragment@0/__overlay__/reserved-memory/buffer@800200000";
+		qrtr_shm = "/fragment@1/__overlay__/qrtr-shm";
+		minidump = "/fragment@1/__overlay__/minidump";
+		qcom_gunyah_vm = "/fragment@1/__overlay__/qcom,gunyah-vm";
+	};
+
+	__local_fixups__ {
+
+		host {
+
+			qcom,gh-qtimer@1781b000 {
+				android,pvmfw,target = <0x00>;
+			};
+
+			qcom,wdt@17600000 {
+				android,pvmfw,target = <0x00>;
+			};
+
+			buffer@800006000 {
+				android,pvmfw,target = <0x00>;
+			};
+
+			buffer@800200000 {
+				android,pvmfw,target = <0x00>;
+			};
+
+			non-devices-common {
+				android,pvmfw,target = <0x00>;
+			};
+
+			avf-mitee-bootshim {
+				android,pvmfw,target = <0x00>;
+			};
+
+			avf-mitee-user {
+				android,pvmfw,target = <0x00>;
+			};
+		};
+
+		fragment@0 {
+
+			__overlay__ {
+
+				soc {
+
+					non-devices-common {
+						required-subnodes = <0x00 0x04 0x08 0x0c 0x10 0x14 0x18>;
+						required-subnodes-rm = <0x00 0x04 0x08>;
+					};
+				};
+
+				mitee-bootshim {
+					required-subnodes = <0x00 0x04 0x08>;
+				};
+
+				mitee-user {
+					required-subnodes = <0x00 0x04>;
+
+					sfs {
+						required-subnodes = <0x00>;
+					};
+				};
+			};
+		};
+
+		fragment@1 {
+
+			__overlay__ {
+
+				qrtr-shm {
+					buffer = <0x00>;
+					memory-region = <0x00>;
+				};
+			};
+		};
+	};
+};
