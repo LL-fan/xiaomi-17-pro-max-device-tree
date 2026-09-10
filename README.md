@@ -1,8 +1,10 @@
 # Xiaomi 17 Pro Max (popsicle / canoe / SM8850) Device Tree
 
+#说点闲话~（ps：目前我的类原生系列还在持续开发中，希望多多关注酷安@岚岚凡~）
 这是我的个人设备树项目，收录小米 17 Pro Max（产品代号 **popsicle**、
 高通板级代号 **canoe**、SoC **Qualcomm SM8850**）的 Linux/Android
-**设备树（Device Tree）源码与可复现构建内容**。
+**设备树（Device Tree）源码与可复现构建内容**
+
 
 本仓库的 DTS 是从**真机实际运行的出厂固件中精确提取并反编译**得到，再经过
 `base dtb + 板级 overlay` 合并整理，用于还原设备运行时的设备树；仓库内
